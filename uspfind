@@ -1,0 +1,32 @@
+#!/bin/bash
+gold=$(tput setaf 3)
+rese=$(tput sgr 0)
+if [ "$#" -eq "1" ];then
+	find "$1" -print0 | while read -d $'\0' f
+	do
+		echo $(file "$f" |awk '{print $1}' |sed -n 's/:$//p')
+	done > thisfilewillbedeleted
+	for fname in $(cat thisfilewillbedeleted)
+	do
+		phonu2=$(unzip -p "$fname" 2> /dev/null |grep -E -soa '(\+1\.)?\(?[0-9]{3}\)?( |\.|-)[2-9][0-9]{2}( |\.|-)[0-9]{4}' |tr "\n" " ")
+		if [ ! -z "$phonu2" ];then
+			if [ ! -z $(echo $phonu2 |gawk '{print $2}') ];then
+				echo "File $gold$fname$rese has the following numbers: $phonu2"
+			else
+				echo "File $gold$fname$rese has the following number: $phonu2"
+			fi      
+		else
+			phonu=$(zgrep -E -soa '(\+1\.)?\(?[0-9]{3}\)?( |\.|-)[2-9][0-9]{2}( |\.|-)[0-9]{4}' $fname |tr "\n" " ")
+			if [ ! -z "$phonu" ];then
+				if [ ! -z $(echo $phonu |gawk '{print $2}') ];then
+					echo "File $gold$fname$rese has the following numbers: $phonu"
+				else
+					echo "File $gold$fname$rese has the following number: $phonu"
+				fi
+			fi
+		fi
+	done
+	rm -f thisfilewillbedeleted
+else
+	echo "Please, provide directory name as a parameter"
+fi
